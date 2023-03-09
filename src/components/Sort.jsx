@@ -10,14 +10,11 @@ export const sortList = [
     { name: 'алфавиту(ASC)', sortProperty: '-title' },
 ];
 
-function Sort() {
-    const list = ['популярности', 'цене', 'алфавиту'];
+function Sort({ value, onChangeSort }) {
     const [open, setOpen] = useState(true);
-    const [selected, setSelected] = useState(0);
-    const sortName = list[selected];
 
     const onClickListItem = (i) => {
-        setSelected(i);
+        onChangeSort(i);
         setOpen(false);
     };
 
@@ -36,19 +33,19 @@ function Sort() {
                     />
                 </svg>
                 <b>Сортировка по:</b>
-                <span onClick={() => setOpen(!open)}>{sortName}</span>
+                <span onClick={() => setOpen(!open)}>{value.name}</span>
             </div>
             <div className="sort__popup">
                 {open && (
                     <ul>
-                        {list.map((name, i) => (
+                        {sortList.map((obj, i) => (
                             <li
                                 key={i}
                                 onClick={() => {
-                                    onClickListItem(i);
+                                    onClickListItem(obj);
                                 }}
-                                className={selected === i ? 'active' : ''}>
-                                {name}
+                                className={value.sortProperty === obj.sortProperty ? 'active' : ''}>
+                                {obj.name}
                             </li>
                         ))}
                     </ul>
