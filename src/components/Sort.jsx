@@ -11,11 +11,11 @@ export const sortList = [
 ];
 
 function Sort({ value, onChangeSort }) {
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
 
     const onClickListItem = (i) => {
         onChangeSort(i);
-        setOpen(false);
+        setOpen(true);
     };
 
     return (

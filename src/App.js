@@ -5,15 +5,18 @@ import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Cart from './pages/Cart';
 import NotFound from './pages/NotFound';
-import { useState, createContext } from 'react';
+import { useState } from 'react';
+import { createContext } from 'react';
 
 export const SearchContext = createContext('');
 
 function App() {
     const [searchValue, setSearchValue] = useState('');
+    console.log(searchValue, 'helloo');
+
     return (
-        <SearchContext value={(searchValue, setSearchValue)}>
-            <div className="wrapper">
+        <div className="wrapper">
+            <SearchContext.Provider value={{ searchValue, setSearchValue }}>
                 <Header />
                 <div className="content">
                     <div className="container">
@@ -24,8 +27,8 @@ function App() {
                         </Routes>
                     </div>
                 </div>
-            </div>
-        </SearchContext>
+            </SearchContext.Provider>
+        </div>
     );
 }
 
