@@ -1,33 +1,41 @@
 import axios from 'axios';
 import React, { useEffect, useState, useContext } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+
 import Categories from '../components/Categories';
 import Pagination from '../components/Pagination';
 import PizzaBlock from '../components/PizzaBlock';
 import Skeleton from '../components/PizzaBlock/Skeleton';
 import Sort from '../components/Sort';
+import { setCategoryId } from '../redux/slices/filterSlice';
 import { SearchContext } from '../App';
 
 const Home = () => {
+    const { categoryId, sort } = useSelector((state) => state.filterSlice);
+    const sortType = sort.sortProperty;
+
     const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [categoryId, setCategoryId] = useState(0);
-    const [sortType, setSortType] = useState({
-        name: 'Популярности',
-        sortProperty: 'rating',
-    });
+
     const [currentPage, setCurrentPage] = useState(1);
     const { searchValue } = useContext(SearchContext);
+    const dispatch = useDispatch();
+
+    const onClickCategory = (id) => {
+        dispatch(setCategoryId(id));
+    };
 
     useEffect(() => {
         setIsLoading(true);
 
+        const order = sortType.includes('-') ? 'asc' : 'desc';
+        const sortBy = sortType.replace('-', '');
+        const category = categoryId > 0 ? `category=${categoryId}` : '';
+        const search = searchValue ? `&search=${searchValue}` : '';
+
         axios
             .get(
-                `https://6384c0c94ce192ac60624a72.mockapi.io/items?page=${currentPage}&limit=4${
-                    categoryId > 0 ? `category=${categoryId}` : ''
-                }&sortBy=${sortType.sortProperty.replace('-', '')}${
-                    searchValue ? `&search=${searchValue}` : ''
-                }&order=${sortType.sortProperty.includes('-') ? 'asc' : 'desc'}`,
+                `https://6384c0c94ce192ac60624a72.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`,
             )
             .then((res) => {
                 setItems(res.data);
@@ -42,8 +50,8 @@ const Home = () => {
     return (
         <div className="container">
             <div className="content__top">
-                <Categories value={categoryId} onChangeCategory={(id) => setCategoryId(id)} />
-                <Sort value={sortType} onChangeSort={(id) => setSortType(id)} />
+                <Categories value={categoryId} onClickCategory={onClickCategory} />
+                <Sort />
             </div>
             <h2 className="content__title">Все пиццы</h2>
             <div className="content__items">{isLoading ? skeletons : pizzas}</div>
