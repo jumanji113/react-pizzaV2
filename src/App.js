@@ -12,7 +12,6 @@ export const SearchContext = createContext('');
 
 function App() {
     const [searchValue, setSearchValue] = useState('');
-    console.log(searchValue, 'helloo');
 
     return (
         <div className="wrapper">

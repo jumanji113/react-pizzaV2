@@ -1,14 +1,36 @@
-import React from 'react';
-import { useContext } from 'react';
+import React, { useCallback } from 'react';
+import debounce from 'lodash.debounce';
 import { SearchContext } from '../../App';
+
 import styles from './Search.module.scss';
+import { useSelector } from 'react-redux';
 
 const Search = () => {
+    const { items, totalPrice } = useSelector((state) => state.cartSlice);
+    const [value, setValue] = React.useState('');
+    const { setSearchValue } = React.useContext(SearchContext);
+
+    let inputRef = React.useRef();
+
     const onClear = () => {
         setSearchValue('');
+        setValue('');
+        inputRef.current.focus();
     };
 
-    const { searchValue, setSearchValue } = useContext(SearchContext);
+    const updateSearchValue = useCallback(
+        () =>
+            debounce((str) => {
+                setSearchValue(str);
+            }, 150),
+        [],
+    );
+
+    const onChangeInput = (event) => {
+        setValue(event.target.value);
+        updateSearchValue(event.target.value);
+    };
+
     return (
         <div className={styles.root}>
             <svg
@@ -23,15 +45,15 @@ const Search = () => {
                 />
             </svg>
             <input
-                value={searchValue}
-                onChange={(event) => setSearchValue(event.target.value)}
+                ref={inputRef}
+                value={value}
+                onChange={onChangeInput}
                 className={styles.input}
-                placeholder="Поиск пицц..."
-                type="text"
+                placeholder="Поиск пиццы..."
             />
-            {searchValue ? (
+            {value && (
                 <svg
-                    onClick={() => onClear()}
+                    onClick={onClear}
                     className={styles.close}
                     xmlns="http://www.w3.org/2000/svg"
                     height="14px"
@@ -43,8 +65,6 @@ const Search = () => {
                         id="Shape"
                     />
                 </svg>
-            ) : (
-                ''
             )}
         </div>
     );
