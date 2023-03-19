@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, { useEffect, useState, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import qs from 'qs';
@@ -12,6 +11,7 @@ import Sort, { sortList } from '../components/Sort';
 import { setCategoryId, setCurrentPage, setFilters } from '../redux/slices/filterSlice';
 import { SearchContext } from '../App';
 import { useRef } from 'react';
+import { fetchPizzas } from '../redux/slices/pizzaSlice';
 
 const Home = () => {
     const dispatch = useDispatch();
@@ -20,9 +20,8 @@ const Home = () => {
     const isMounted = useRef(false);
 
     const { categoryId, sort, currentPage } = useSelector((state) => state.filterSlice); //из редакса получаем стейты
-    const sortType = sort.sortProperty; // вытаскиваем из сорта нужное свойтство объекта
-    const [items, setItems] = useState([]); //стейт пустой массив, потом будут хранится пиццы
-    const [isLoading, setIsLoading] = useState(true); //стейт загрузки
+    const { items, status } = useSelector((state) => state.pizzaSlice); //из редакса получаем стейты
+    const sortType = sort.sortProperty; // вытаскиваем из сорта нужное свойтство объекта//стейт загрузки
 
     const { searchValue } = useContext(SearchContext); // используем контекст
     // метод для экшнов
@@ -35,24 +34,23 @@ const Home = () => {
         dispatch(setCurrentPage(number));
     }; // аналогия как с категориями
 
-    const fetchPizzas = () => {
-        //асинхронный код, получаем с бэка данные
-        setIsLoading(true); // стейт загрузки правдивый
+    const getPizzas = async () => {
+        //асинхронный код, получаем с бэка данные // стейт загрузки правдивый
 
         const order = sortType.includes('-') ? 'asc' : 'desc'; // если тип сортировки содержит - то по-убыванию сортировка
         const sortBy = sortType.replace('-', ''); // убираем -
         const category = categoryId > 0 ? `category=${categoryId}` : '';
         const search = searchValue ? `&search=${searchValue}` : '';
 
-        axios
-            .get(
-                `https://6384c0c94ce192ac60624a72.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`,
-            )
-            .then((res) => {
-                setItems(res.data);
-                setIsLoading(false);
-            });
-        window.scrollTo(0, 0);
+        dispatch(
+            fetchPizzas({
+                order,
+                sortBy,
+                category,
+                search,
+                currentPage,
+            }),
+        );
     };
 
     // вшиваем ссылку в браузере с помощью qs - парсинг нужных параметров
@@ -89,7 +87,7 @@ const Home = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
         if (!isSearch.current) {
-            fetchPizzas();
+            getPizzas();
         }
 
         isSearch.current = false;
@@ -105,7 +103,14 @@ const Home = () => {
                 <Sort />
             </div>
             <h2 className="content__title">Все пиццы</h2>
-            <div className="content__items">{isLoading ? skeletons : pizzas}</div>
+            {status === 'error' ? (
+                <div className="content__error-info">
+                    <h2>Произошла ошибка😕</h2>
+                    <p>Не удалось загрузить пиццы!</p>
+                </div>
+            ) : (
+                <div className="content__items">{status === 'loading' ? skeletons : pizzas}</div>
+            )}
             <Pagination currentPage={currentPage} onChangePage={onChangePage} />
         </div>
     );
