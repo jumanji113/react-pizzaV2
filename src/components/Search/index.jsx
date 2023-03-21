@@ -1,19 +1,18 @@
 import React, { useCallback } from 'react';
 import debounce from 'lodash.debounce';
-import { SearchContext } from '../../App';
+import { setSearchValue } from '../../redux/slices/filterSlice';
 
 import styles from './Search.module.scss';
-import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 const Search = () => {
-    const { items, totalPrice } = useSelector((state) => state.cartSlice);
+    const dispatch = useDispatch();
     const [value, setValue] = React.useState('');
-    const { setSearchValue } = React.useContext(SearchContext);
 
-    let inputRef = React.useRef();
+    let inputRef = React.useRef(null);
 
     const onClear = () => {
-        setSearchValue('');
+        dispatch(setSearchValue(''));
         setValue('');
         inputRef.current.focus();
     };
@@ -21,7 +20,7 @@ const Search = () => {
     const updateSearchValue = useCallback(
         () =>
             debounce((str) => {
-                setSearchValue(str);
+                dispatch(setSearchValue(str));
             }, 150),
         [],
     );

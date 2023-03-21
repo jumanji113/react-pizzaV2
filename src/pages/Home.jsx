@@ -1,17 +1,21 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import qs from 'qs';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 import Categories from '../components/Categories';
 import Pagination from '../components/Pagination';
 import PizzaBlock from '../components/PizzaBlock';
 import Skeleton from '../components/PizzaBlock/Skeleton';
 import Sort, { sortList } from '../components/Sort';
-import { setCategoryId, setCurrentPage, setFilters } from '../redux/slices/filterSlice';
-import { SearchContext } from '../App';
+import {
+    selectedFilter,
+    setCategoryId,
+    setCurrentPage,
+    setFilters,
+} from '../redux/slices/filterSlice';
 import { useRef } from 'react';
-import { fetchPizzas } from '../redux/slices/pizzaSlice';
+import { fetchPizzas, selectPizzaData } from '../redux/slices/pizzaSlice';
 
 const Home = () => {
     const dispatch = useDispatch();
@@ -19,12 +23,9 @@ const Home = () => {
     const isSearch = useRef(false);
     const isMounted = useRef(false);
 
-    const { categoryId, sort, currentPage } = useSelector((state) => state.filterSlice); //из редакса получаем стейты
-    const { items, status } = useSelector((state) => state.pizzaSlice); //из редакса получаем стейты
-    const sortType = sort.sortProperty; // вытаскиваем из сорта нужное свойтство объекта//стейт загрузки
-
-    const { searchValue } = useContext(SearchContext); // используем контекст
-    // метод для экшнов
+    const { categoryId, sort, currentPage, searchValue } = useSelector(selectedFilter); //из редакса получаем стейты
+    const { items, status } = useSelector(selectPizzaData); //из редакса получаем стейты
+    const sortType = sort.sortProperty;
 
     const onClickCategory = (id) => {
         dispatch(setCategoryId(id));
@@ -93,7 +94,11 @@ const Home = () => {
         isSearch.current = false;
     }, [categoryId, sortType, searchValue, currentPage]);
 
-    const pizzas = items.map((obj) => <PizzaBlock {...obj} key={obj.id} />); //массив пицц с помощью метода мэп , превращаем в джсх элемент
+    const pizzas = items.map((obj) => (
+        <Link to={`/pizza/${obj.id}`}>
+            <PizzaBlock {...obj} />
+        </Link>
+    )); //массив пицц с помощью метода мэп , превращаем в джсх элемент
     const skeletons = [...new Array(6)].map((_, index) => <Skeleton key={index} />); // скелетоны при загрузке, с помощью пустового массива
 
     return (
