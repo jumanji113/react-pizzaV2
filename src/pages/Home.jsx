@@ -27,9 +27,10 @@ const Home = () => {
     const { items, status } = useSelector(selectPizzaData); //из редакса получаем стейты
     const sortType = sort.sortProperty;
 
-    const onClickCategory = (id) => {
-        dispatch(setCategoryId(id));
-    }; //функцию изменения категорий, диспатчим из слайса
+    const onChangeCategory = React.useCallback((idx) => {
+        dispatch(setCategoryId(idx));
+    }, []);
+    //функцию изменения категорий, диспатчим из слайса
 
     const onChangePage = (number) => {
         dispatch(setCurrentPage(number));
@@ -104,7 +105,7 @@ const Home = () => {
     return (
         <div className="container">
             <div className="content__top">
-                <Categories value={categoryId} onClickCategory={onClickCategory} />
+                <Categories value={categoryId} onChangeCategory={onChangeCategory} />
                 <Sort />
             </div>
             <h2 className="content__title">Все пиццы</h2>

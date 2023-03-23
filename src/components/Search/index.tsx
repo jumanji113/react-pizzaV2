@@ -9,23 +9,22 @@ const Search = () => {
     const dispatch = useDispatch();
     const [value, setValue] = React.useState('');
 
-    let inputRef = React.useRef(null);
+    let inputRef = React.useRef<HTMLInputElement>(null);
 
     const onClear = () => {
         dispatch(setSearchValue(''));
         setValue('');
-        inputRef.current.focus();
+        inputRef.current?.focus();
     };
 
     const updateSearchValue = useCallback(
-        () =>
-            debounce((str) => {
-                dispatch(setSearchValue(str));
-            }, 150),
+        debounce((str: string) => {
+            dispatch(setSearchValue(str));
+        }, 150),
         [],
     );
 
-    const onChangeInput = (event) => {
+    const onChangeInput = (event: React.ChangeEvent<HTMLInputElement>) => {
         setValue(event.target.value);
         updateSearchValue(event.target.value);
     };
