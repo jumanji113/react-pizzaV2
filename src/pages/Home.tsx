@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import qs from 'qs';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -15,10 +15,11 @@ import {
     setFilters,
 } from '../redux/slices/filterSlice';
 import { useRef } from 'react';
-import { fetchPizzas, selectPizzaData } from '../redux/slices/pizzaSlice';
+import { fetchPizzas, SearchPizzaParams, selectPizzaData } from '../redux/slices/pizzaSlice';
+import { useAppDispatch } from '../redux/store';
 
-const Home = () => {
-    const dispatch = useDispatch();
+const Home: React.FC = () => {
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const isSearch = useRef(false);
     const isMounted = useRef(false);
@@ -27,13 +28,13 @@ const Home = () => {
     const { items, status } = useSelector(selectPizzaData); //из редакса получаем стейты
     const sortType = sort.sortProperty;
 
-    const onChangeCategory = React.useCallback((idx) => {
+    const onChangeCategory = React.useCallback((idx: number) => {
         dispatch(setCategoryId(idx));
     }, []);
     //функцию изменения категорий, диспатчим из слайса
 
-    const onChangePage = (number) => {
-        dispatch(setCurrentPage(number));
+    const onChangePage = (page: number) => {
+        dispatch(setCurrentPage(page));
     }; // аналогия как с категориями
 
     const getPizzas = async () => {
@@ -50,7 +51,7 @@ const Home = () => {
                 sortBy,
                 category,
                 search,
-                currentPage,
+                currentPage: String(currentPage),
             }),
         );
     };
@@ -71,18 +72,20 @@ const Home = () => {
     // Если был первый рендер , то проверяем URL-параметры и сохранеям в редукс
     useEffect(() => {
         if (window.location.search) {
-            const params = qs.parse(window.location.search.substring(1)); // данные из поисковой строки парсяться в объект
-
-            const sort = sortList.find((obj) => obj.sortProperty === params.sortProperty);
-
+            const params = qs.parse(
+                window.location.search.substring(1),
+            ) as unknown as SearchPizzaParams;
+            const sort = sortList.find((obj) => obj.sortProperty === params.sortBy);
             dispatch(
                 setFilters({
-                    ...params,
-                    sort,
+                    searchValue: params.search,
+                    categoryId: Number(params.category),
+                    currentPage: Number(params.currentPage),
+                    sort: sort || sortList[0],
                 }),
             );
-            isSearch.current = true;
         }
+        isMounted.current = true;
     }, []);
 
     // если был 1 рендер, то запрашиваем пиццы
@@ -95,18 +98,14 @@ const Home = () => {
         isSearch.current = false;
     }, [categoryId, sortType, searchValue, currentPage]);
 
-    const pizzas = items.map((obj) => (
-        <Link to={`/pizza/${obj.id}`}>
-            <PizzaBlock {...obj} />
-        </Link>
-    )); //массив пицц с помощью метода мэп , превращаем в джсх элемент
+    const pizzas = items.map((obj: any) => <PizzaBlock key={obj.id} {...obj} />); //массив пицц с помощью метода мэп , превращаем в джсх элемент
     const skeletons = [...new Array(6)].map((_, index) => <Skeleton key={index} />); // скелетоны при загрузке, с помощью пустового массива
 
     return (
         <div className="container">
             <div className="content__top">
                 <Categories value={categoryId} onChangeCategory={onChangeCategory} />
-                <Sort />
+                <Sort value={sort} />
             </div>
             <h2 className="content__title">Все пиццы</h2>
             {status === 'error' ? (
