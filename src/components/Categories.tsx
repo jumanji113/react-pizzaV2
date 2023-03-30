@@ -7,7 +7,7 @@ type CategoriesProps = {
 };
 const categories = ['Все', 'Мясные', 'Вегетарианские', 'Гриль', 'Острые', 'Закрытые'];
 
-const Categories: React.FC<CategoriesProps> = React.memo(({ value, onChangeCategory }) => {
+export const Categories: React.FC<CategoriesProps> = React.memo(({ value, onChangeCategory }) => {
     useWhyDidYouUpdate('Categories', { value, onChangeCategory });
     return (
         <div className="categories">
@@ -24,5 +24,3 @@ const Categories: React.FC<CategoriesProps> = React.memo(({ value, onChangeCateg
         </div>
     );
 });
-
-export default Categories;
