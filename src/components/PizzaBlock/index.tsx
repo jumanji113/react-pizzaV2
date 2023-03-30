@@ -69,7 +69,7 @@ const PizzaBlock: React.FC<PizzaBlockProps> = ({ id, title, price, imageUrl, siz
             </div>
             <div className="pizza-block__bottom">
                 <div className="pizza-block__price">{price}</div>
-                <div onClick={onClickAdd} className="button button--outline button--add">
+                <button onClick={onClickAdd} className="button button--outline button--add">
                     <svg
                         width="12"
                         height="12"
@@ -83,7 +83,7 @@ const PizzaBlock: React.FC<PizzaBlockProps> = ({ id, title, price, imageUrl, siz
                     </svg>
                     <span>Добавить</span>
                     {addCount > 0 && <i>{addCount}</i>}
-                </div>
+                </button>
             </div>
         </div>
     );
